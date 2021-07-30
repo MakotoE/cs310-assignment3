@@ -1,3 +1,4 @@
+from timeit import timeit
 from statistics import stdev, mean
 from typing import List, Tuple
 from itertools import combinations
@@ -40,8 +41,11 @@ def print_correlations(correlations: List[Tuple[Tuple[str, str], float]]):
 
 
 if __name__ == '__main__':
-	symbols = ['AAPL', 'AMZN', 'FB', 'GOOG', 'IBM', 'MSFT', 'NFLX', 'ORCL', 'SAP', 'TSLA']
-	stock_prices = [(s, read_prices(s)) for s in symbols]
+	stock_prices = [
+		(s, read_prices(s))
+		for s in ['AAPL', 'AMZN', 'FB', 'GOOG', 'IBM', 'MSFT', 'NFLX', 'ORCL', 'SAP', 'TSLA']
+	]
+
 	correlations_stdlib = [
 		((x_name, y_name), correlation_using_stdlib(x_prices, y_prices))
 		for ((x_name, x_prices), (y_name, y_prices)) in combinations(stock_prices, 2)
@@ -61,3 +65,15 @@ if __name__ == '__main__':
 	print('\nNumPy version')
 
 	print_correlations(correlations_numpy)
+
+	stdlib_duration = timeit(lambda: [
+		((x_name, y_name), correlation_using_stdlib(x_prices, y_prices))
+		for ((x_name, x_prices), (y_name, y_prices)) in combinations(stock_prices, 2)
+	], number=2) / 2
+	print(f'\nnon-NumPy version execution time: {stdlib_duration:.6f}s')
+
+	numpy_duration = timeit(lambda: [
+		((x_name, y_name), correlation_using_numpy(np.array(x_prices), np.array(y_prices)))
+		for ((x_name, x_prices), (y_name, y_prices)) in combinations(stock_prices, 2)
+	], number=10) / 10
+	print(f'NumPy version execution time: {numpy_duration:.6f}s')
