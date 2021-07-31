@@ -2,19 +2,17 @@ import unittest
 import numpy as np
 from assn3 import correlation_using_stdlib, read_prices, correlation_using_numpy
 
+appl = read_prices('AAPL')
+amzn = read_prices('AMZN')
+expected = np.corrcoef(appl, amzn)[0][1]
+
 
 class MyTestCase(unittest.TestCase):
 	def test_correlation_using_stdlib(self):
-		self.assertAlmostEqual(
-			0.8405047735028569,
-			correlation_using_stdlib(read_prices('AAPL'), read_prices('AMZN')),
-		)
+		self.assertAlmostEqual(expected, correlation_using_stdlib(appl, amzn))
 
 	def test_correlation_using_numpy(self):
-		self.assertAlmostEqual(
-			0.8405047735028567,
-			correlation_using_numpy(np.array(read_prices('AAPL')), np.array(read_prices('AMZN'))),
-		)
+		self.assertAlmostEqual(expected, correlation_using_numpy(np.array(appl), np.array(amzn)))
 
 
 if __name__ == '__main__':
