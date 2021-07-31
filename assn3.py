@@ -28,7 +28,7 @@ def correlation_using_stdlib(x_prices: List[float], y_prices: List[float]) -> fl
 	return numerator / ((len(x_prices) - 1) * stdev(x_prices) * stdev(y_prices))
 
 
-def correlation_using_numpy(x_prices: np.ndarray, y_prices: np.ndarray) -> float:
+def correlation(x_prices: np.ndarray, y_prices: np.ndarray) -> float:
 	return np.divide(
 		np.multiply((x_prices - x_prices.mean()), (y_prices - y_prices.mean())).sum(),
 		(len(x_prices) - 1) * x_prices.std(ddof=1) * y_prices.std(ddof=1),
@@ -57,7 +57,7 @@ if __name__ == '__main__':
 	print_correlations(correlations_stdlib)
 
 	correlations_numpy = [
-		((x_name, y_name), correlation_using_numpy(np.array(x_prices), np.array(y_prices)))
+		((x_name, y_name), correlation(np.array(x_prices), np.array(y_prices)))
 		for ((x_name, x_prices), (y_name, y_prices)) in combinations(stock_prices, 2)
 	]
 	correlations_numpy.sort(key=lambda item: item[1], reverse=True)
@@ -66,14 +66,15 @@ if __name__ == '__main__':
 
 	print_correlations(correlations_numpy)
 
-	stdlib_duration = timeit(lambda: [
-		((x_name, y_name), correlation_using_stdlib(x_prices, y_prices))
-		for ((x_name, x_prices), (y_name, y_prices)) in combinations(stock_prices, 2)
-	], number=2) / 2
+	executions = 100
+	stdlib_duration = timeit(
+		lambda: correlation_using_stdlib(stock_prices[0][1], stock_prices[1][1]),
+		number=executions,
+	) / executions
 	print(f'\nnon-NumPy version execution time: {stdlib_duration:.6f}s')
 
-	numpy_duration = timeit(lambda: [
-		((x_name, y_name), correlation_using_numpy(np.array(x_prices), np.array(y_prices)))
-		for ((x_name, x_prices), (y_name, y_prices)) in combinations(stock_prices, 2)
-	], number=10) / 10
+	numpy_duration = timeit(
+		lambda: correlation(np.array(stock_prices[0][1]), np.array(stock_prices[1][1])),
+		number=executions,
+	) / executions
 	print(f'NumPy version execution time: {numpy_duration:.6f}s')
